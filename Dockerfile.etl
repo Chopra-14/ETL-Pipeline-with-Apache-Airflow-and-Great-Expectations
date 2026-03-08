@@ -1,0 +1,25 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy project files
+COPY etl_scripts/ ./etl_scripts/
+COPY great_expectations/ ./great_expectations/
+COPY tests/ ./tests/
+COPY dags/ ./dags/
+
+# Set environment variables
+ENV PYTHONPATH="${PYTHONPATH}:/app"
+
+# Default command to run tests
+CMD ["pytest", "tests/test_silver_transformer.py"]
